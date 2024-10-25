@@ -9,6 +9,21 @@ import redis
 import uuid
 
 
+def count_calls(method: Callable) -> Callable:
+    '''Tracks the number of calls made to a method in a Cache class.
+    '''
+    @wraps(method)
+    def wrapper(self, *args, **kwargs) -> Any:
+        '''returns the given method after incrementing its call counter.
+        '''
+
+        if isinstance(self._redis, redis.Redis):
+            self._redis.incr(method.__qualname__)
+        return method(self, *args, **kwargs)
+
+    return wrapper
+
+
 class Cache:
     """
     Write strings to Redis
